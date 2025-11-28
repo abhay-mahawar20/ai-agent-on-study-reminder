@@ -1,0 +1,209 @@
+{
+  "name": "study reminder assistant",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a helpful study reminder assistant that helps students manage their study schedules.\n\nYour capabilities:\n- Add new study reminders to the Google Sheet using the Google Sheets Tool\n- View existing reminders from the sheet\n- Update or delete reminders\n- Send test reminders via Telegram\n- Provide study tips and motivation\n\nWhen users ask to add reminders, collect:\n- Subject/topic to study\n- Date and time for the reminder\n- Any specific tasks or goals\n- Their Telegram chat ID (if not already known)\n\nBe friendly, encouraging, and help students stay organized with their studies."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        416,
+        672
+      ],
+      "id": "7e7f5efc-4c5c-44c5-ad6f-92bba49678c0",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        256,
+        928
+      ],
+      "id": "f7acfa17-bc8b-461c-bc3d-cbc7a65e7340",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "aWwawzhhSqOODnJH",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.chat.id }}{{ $json.message.from.id }}",
+        "contextWindowLength": 9
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        368,
+        928
+      ],
+      "id": "68ed63da-5228-4e0d-aeb3-882fcc068927",
+      "name": "Simple Memory",
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.from.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML",
+          "reply_to_message_id": "={{ $('Telegram Trigger').item.json.message.chat.id }}"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        768,
+        672
+      ],
+      "id": "d6d8e0ac-8a2b-4f1a-91b2-792c43dd287e",
+      "name": "Send a text message",
+      "webhookId": "a90d649d-27f3-407b-bdc3-0def4a0a7b0e",
+      "credentials": {
+        "telegramApi": {
+          "id": "vlHP6ZWnPClULR3Y",
+          "name": "Telegram account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        192,
+        672
+      ],
+      "id": "7d1dfb40-8a88-4369-8e9b-2eaf6a8879c2",
+      "name": "Telegram Trigger",
+      "webhookId": "92a6dca6-1e2a-4ca7-b26e-4ffb45d5bfe4",
+      "credentials": {
+        "telegramApi": {
+          "id": "vlHP6ZWnPClULR3Y",
+          "name": "Telegram account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1sY3ScKFuPVWwfVixXOCYKh49T4epL6xA8khFZRB1Xns",
+          "mode": "list",
+          "cachedResultName": "reminder1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1sY3ScKFuPVWwfVixXOCYKh49T4epL6xA8khFZRB1Xns/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 432107549,
+          "mode": "list",
+          "cachedResultName": "Sheet2",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1sY3ScKFuPVWwfVixXOCYKh49T4epL6xA8khFZRB1Xns/edit#gid=432107549"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        592,
+        928
+      ],
+      "id": "b3e51743-a88d-438c-a125-16f07cebe0c2",
+      "name": "Get row(s) in sheet in Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "E74bHxqYAPg6MILL",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e4e63f52-8b41-4b39-b24b-cb6fcd6de23b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "08a20566b81e76118ec7f40145980e944178200d4a2b4541590d23516882178c"
+  },
+  "id": "O7YyD9OHvUViXqUM",
+  "tags": []
+}

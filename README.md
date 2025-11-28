@@ -81,8 +81,14 @@ ________________________________________
 •	Study progress analysis
 •	AI-generated revision suggestions
 ________________________________________
+working:
+
 🙌 Conclusion
 This AI Study Reminder Agent is perfect for students who want a smart, automated, and personalized system to stay consistent with studies. Built fully in n8n, it requires zero coding and gives maximum flexibility.
 If you want UI, workflow, or bot integration—this can be extended anytime!
 workflow
+<img width="1032" height="646" alt="image" src="https://github.com/user-attachments/assets/8542d051-b18a-4713-b88f-aade5bad7584" />
+
+
+
  
